@@ -28,6 +28,7 @@ jobs:
         env:
           INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
           INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
+          INSTAGRAM_CHALLENGE_CODE: ${{ secrets.INSTAGRAM_CHALLENGE_CODE }}
           INSTAGRAM_SESSION_FILE: session.json
         run: python create_session.py
 
