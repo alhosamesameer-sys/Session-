@@ -3,8 +3,8 @@ from pathlib import Path
 
 from instagrapi import Client
 
-USERNAME = os.getenv("INSTAGRAM_USERNAME")
-PASSWORD = os.getenv("INSTAGRAM_PASSWORD")
+USERNAME = "sa.me_er"
+PASSWORD = sameer1234$_$14"
 SESSION_FILE = Path(os.getenv("INSTAGRAM_SESSION_FILE", "session.json"))
 
 
