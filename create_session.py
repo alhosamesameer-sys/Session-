@@ -1,41 +1,47 @@
 import os
+import sys
 from pathlib import Path
 
 from instagrapi import Client
 
-USERNAME = "sa.me_er"
-PASSWORD = sameer1234$_$14"
+USERNAME = os.getenv("INSTAGRAM_USERNAME", "").strip()
+PASSWORD = os.getenv("INSTAGRAM_PASSWORD", "")
 SESSION_FILE = Path(os.getenv("INSTAGRAM_SESSION_FILE", "session.json"))
 
 
-def main():
+def main() -> int:
     if not USERNAME or not PASSWORD:
-        raise SystemExit(
-            "يرجى ضبط INSTAGRAM_USERNAME و INSTAGRAM_PASSWORD كمتغيرات بيئة أولاً."
+        print(
+            "Missing GitHub Actions secrets: add INSTAGRAM_USERNAME and "
+            "INSTAGRAM_PASSWORD under Settings > Secrets and variables > Actions.",
+            file=sys.stderr,
         )
+        return 2
 
-    cl = Client()
+    client = Client()
 
     try:
         if SESSION_FILE.is_file():
-            cl.load_settings(str(SESSION_FILE))
-            print("تم العثور على جلسة محفوظة؛ جارٍ التحقق منها...")
+            client.load_settings(str(SESSION_FILE))
+            print("Found an existing session; validating it...")
 
-        cl.login(USERNAME, PASSWORD)
-        cl.dump_settings(str(SESSION_FILE))
+        client.login(USERNAME, PASSWORD)
+        client.dump_settings(str(SESSION_FILE))
 
         try:
             SESSION_FILE.chmod(0o600)
         except OSError:
             pass
 
-        print(f"تم تسجيل الدخول وحفظ/تحديث الجلسة: {SESSION_FILE}")
-        print(f"Instagram User ID: {cl.user_id}")
+        print(f"Login successful. Session saved to: {SESSION_FILE}")
+        print(f"Instagram User ID: {client.user_id}")
+        return 0
 
     except Exception as exc:
-        print(f"تعذّر تسجيل الدخول أو حفظ الجلسة: {type(exc).__name__}: {exc}")
-        raise SystemExit(1)
+        # Do not print credentials, request headers, or session data.
+        print(f"Instagram login/session creation failed: {type(exc).__name__}: {exc}", file=sys.stderr)
+        return 1
 
 
 if __name__ == "__main__":
-    main()
+    raise SystemExit(main())
