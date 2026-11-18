@@ -1,52 +1,41 @@
-import json
 import os
 import sys
 from pathlib import Path
 
 from instagrapi import Client
 
-SESSION_JSON = os.getenv("INSTAGRAM_SESSION_JSON", "")
+USERNAME = os.getenv("INSTAGRAM_USERNAME", "").strip()
+PASSWORD = os.getenv("INSTAGRAM_PASSWORD", "")
 SESSION_FILE = Path(os.getenv("INSTAGRAM_SESSION_FILE", "session.json"))
 
 
 def main() -> int:
-    if not SESSION_JSON.strip():
+    if not USERNAME or not PASSWORD:
         print(
-            "Missing INSTAGRAM_SESSION_JSON. Export the working Instagram "
-            "session from your trusted computer, then save the complete "
-            "session.json contents as a GitHub Actions repository secret "
-            "named INSTAGRAM_SESSION_JSON.",
+            "Missing INSTAGRAM_USERNAME or INSTAGRAM_PASSWORD. "
+            "Add both as GitHub Actions repository secrets.",
             file=sys.stderr,
         )
         return 2
 
     try:
-        # Parse and validate the secret without printing its contents.
-        settings = json.loads(SESSION_JSON)
-        if not isinstance(settings, dict) or not settings:
-            raise ValueError("The session JSON must be a non-empty object.")
+        client = Client()
+        client.login(USERNAME, PASSWORD)
 
         SESSION_FILE.parent.mkdir(parents=True, exist_ok=True)
-        SESSION_FILE.write_text(
-            json.dumps(settings, ensure_ascii=False, separators=(",", ":")),
-            encoding="utf-8",
-        )
+        client.dump_settings(str(SESSION_FILE))
         try:
             SESSION_FILE.chmod(0o600)
         except OSError:
             pass
 
-        client = Client()
-        client.load_settings(str(SESSION_FILE))
-
-        print("Session settings imported successfully.")
+        print("Instagram login succeeded and a new session was saved.")
         print(f"Session file created: {SESSION_FILE}")
-        print("No Instagram password login or verification challenge was attempted.")
         return 0
 
     except Exception as exc:
         print(
-            f"Session import failed: {type(exc).__name__}: {exc}",
+            f"Instagram session creation failed: {type(exc).__name__}: {exc}",
             file=sys.stderr,
         )
         return 1
