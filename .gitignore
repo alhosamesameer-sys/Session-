@@ -1,0 +1,5 @@
+# Instagram credentials and private session data
+.env
+.env.*
+session.json
+*.session
