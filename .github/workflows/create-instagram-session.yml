@@ -1,4 +1,4 @@
-name: Create Instagram Session
+name: Import Instagram Session
 
 on:
   workflow_dispatch:
@@ -7,9 +7,9 @@ permissions:
   contents: read
 
 jobs:
-  create-session:
+  import-session:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -24,11 +24,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Create Instagram session
+      - name: Import existing Instagram session
         env:
-          INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
-          INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
-          INSTAGRAM_CHALLENGE_CODE: ${{ secrets.INSTAGRAM_CHALLENGE_CODE }}
+          INSTAGRAM_SESSION_JSON: ${{ secrets.INSTAGRAM_SESSION_JSON }}
           INSTAGRAM_SESSION_FILE: session.json
         run: python create_session.py
 
